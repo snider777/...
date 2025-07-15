@@ -1,1 +1,337 @@
-...
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Modelo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: black;
+      color: white;
+      font-family: 'Poppins', sans-serif;
+    }
+    #scrollContainer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      overflow-y: auto;
+      pointer-events: none;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      text-align: center;
+      padding: 40px;
+      font-size: 20px;
+    }
+    #dedicatoria {
+      white-space: pre-wrap;
+      max-width: 800px;
+      margin-top: 20px;
+    }
+    #foto {
+      max-width: 80vw;
+      max-height: 60vh;
+      display: none;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      box-shadow: 0 0 20px #ff4da6;
+    }
+    canvas {
+      display: block;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: -1;
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/p5@1.7.0/lib/p5.min.js"></script>
+</head>
+<body>
+  <audio id="bgMusic" src="take-on-me.mp3" preload="auto"></audio>
+  <div id="scrollContainer">
+    <img id="foto" src="foto1.jpg" alt="Foto" />
+    <div id="dedicatoria"></div>
+  </div>
+  <script>
+    let frases = ["19/04/2025", "Princesita 🥀"];
+    let clickCount = 0;
+    let fraseIndex = 0;
+    let gotas = [];
+    let mostrarFotoYCadena = false;
+    let mostrarDedicatoria = false;
+    let mensajeFinalizado = false;
+    let musicaIniciada = false;
+
+    let textoBase = "Hola, se que no quieres hablar conmigo, espero estés bien, yo no me siento bien,  no puedo estar sin ti, en vdd t quiero mucho Antonella :( y bueno yo sé q tú tmb como amigo :) pero aún una parte tuya siente algo x mi tal vez muy en el fondo pero yo sé q si, y tienes miedo de demostrarlo y te entiendo x todo lo q me contaste, solo quiero q sepas q nunca t haría daño, en vdd quiero hacerte la mujer más feliz, así como tú me hacías feliz :( eres mi lugar seguro, a la única q le he podido contar cosas q nadie mas sabe, solo tu sabes lo q pasó en mi infancia, y todo lo q te conte, recuerdas nuestro primer beso? Nuestra primera salida? Recuerdas que un tiempo me querías demasiado? Y no querías alejarte? Estoy seguro q el amor que me tuviste no se fue de la noche a la mañana, es x tu miedo q siempre tuviste, en vdd por todo lo q pasamos nos merecemos una segunda oportunidad donde tod salga bien mi princesita:( te prometi que pase lo q pase siempre iba luchar y buscar soluciones a nuestros problemas x más malos q sean :( y estoy acá cumpliendolo, no he comido hace dos días lit todo esto me tiene mal :( lo único q deseo es vuelvas y me tengas en tus brazos como antes, te quiero mucho mi princesita 🥀, dejemos de estar así, no me gusta y creo q a ti tmpco volvamos a ser esos que no podían estar sin el otro, esos dos loquitos , mi niña intentemoslo solo una vez, yo sé q tú puedes hacerlo y puedes quitarte ese miedo, porfa mi anto🥀";
+    let textoVisible = "";
+    let indexLetra = 0;
+    let tiempoEscritura = 0;
+    let velocidadEscritura = 100;
+    let borrando = false;
+    let borrarDesde = null;
+    let esperando = false;
+    let tiempoEspera = 0;
+    let borrandoFinal = false;
+    let coloresTexto = ["#ff8080", "#ff4da6", "#ff00ff"];
+
+    let partesABorrar = [
+      { texto: "También puedo hacer que ciertas partes del texto se borren una vez hayan sido escritas ...", borrado: false },
+      { texto: " Como esa ...", borrado: false }
+    ];
+
+    // PARA la frase "Mi niña de ojos bonitos" y foto
+    let fraseFoto = "Mi niña de ojos bonitos";
+    let textoVisibleFoto = "";
+    let indexLetraFoto = 0;
+    let tiempoEscrituraFoto = 0;
+    const velocidadEscrituraFoto = 100;
+    let tiempoMostrarFoto = 0;
+    const duracionFotoMS = 10000; // 10 segundos
+
+    // PARTICULAS
+    let particulas = [];
+    let particulasLluviaActiva = true; // siempre activas
+
+    // Array para color de letras dedicatoria y frase foto
+    let coloresPorLetra = [];
+    let coloresPorLetraFoto = [];
+
+    function crearParticulas() {
+      for (let i = 0; i < 100; i++) {
+        particulas.push({
+          x: random(width),
+          y: random(height),
+          dx: random(-0.3, 0.3),
+          dy: random(-0.3, 0.3),
+          size: random(2, 4),
+          alpha: random(150, 255),
+          color: random(coloresTexto)
+        });
+      }
+    }
+
+    function moverYdibujarParticulas() {
+      for (let p of particulas) {
+        p.x += p.dx;
+        p.y += p.dy;
+
+        if (p.x < 0 || p.x > width) p.dx *= -1;
+        if (p.y < 0 || p.y > height) p.dy *= -1;
+
+        fill(p.color + hex(Math.floor(p.alpha), 2));
+        noStroke();
+        ellipse(p.x, p.y, p.size);
+      }
+    }
+
+    function setup() {
+      createCanvas(windowWidth, windowHeight);
+      textSize(26);
+      textAlign(CENTER, CENTER);
+      textFont('Poppins');
+      crearParticulas();
+    }
+
+    function windowResized() {
+      resizeCanvas(windowWidth, windowHeight);
+    }
+
+    function mousePressed() {
+      if (!musicaIniciada) {
+        let audio = document.getElementById("bgMusic");
+        audio.play();
+        musicaIniciada = true;
+      }
+
+      if (!mostrarFotoYCadena && !mostrarDedicatoria) {
+        clickCount++;
+        if (clickCount % 2 === 0) {
+          fraseIndex = (fraseIndex + 1) % frases.length;
+          for (let g of gotas) {
+            g.texto = frases[fraseIndex];
+          }
+        }
+        if (clickCount >= 30) {
+          mostrarFotoYCadena = true;
+          tiempoMostrarFoto = millis();
+          textoVisibleFoto = "";
+          indexLetraFoto = 0;
+          document.getElementById("foto").style.display = "block";
+          document.getElementById("scrollContainer").style.pointerEvents = "auto";
+          crearParticulas();
+        }
+
+        // Explosión gotas en click
+        for (let i = 0; i < 20; i++) {
+          let ang = random(TWO_PI);
+          let speed = random(2, 6);
+          gotas.push({
+            x: mouseX,
+            y: mouseY,
+            dx: cos(ang) * speed,
+            dy: sin(ang) * speed,
+            texto: frases[fraseIndex],
+            alpha: 255,
+            explosion: true
+          });
+        }
+      }
+    }
+
+    function draw() {
+      background(0, 100);
+
+      // Siempre partículas si activas
+      if (particulasLluviaActiva) {
+        moverYdibujarParticulas();
+      }
+
+      if (!mostrarFotoYCadena && !mostrarDedicatoria) {
+        // Lluvia de frases
+        textAlign(CENTER, CENTER);
+        textSize(24);
+        if (frameCount % 8 === 0) {
+          let x = random(width);
+          let y = -30;
+          let speed = random(2, 4);
+          gotas.push({
+            x: x,
+            y: y,
+            speed: speed,
+            alpha: 255,
+            texto: frases[fraseIndex],
+            explosion: false
+          });
+        }
+
+        for (let i = gotas.length - 1; i >= 0; i--) {
+          let g = gotas[i];
+          let color = random(coloresTexto);
+          fill(color + hex(Math.floor(g.alpha), 2));
+          text(g.texto, g.x, g.y);
+
+          if (g.explosion) {
+            g.x += g.dx;
+            g.y += g.dy;
+            g.alpha -= 5;
+          } else {
+            g.y += g.speed;
+            g.alpha -= 1.5;
+          }
+
+          if (g.alpha <= 0 || g.y > height + 50) {
+            gotas.splice(i, 1);
+          }
+        }
+
+        document.getElementById("foto").style.display = "none";
+        document.getElementById("dedicatoria").innerHTML = "";
+      }
+      
+      else if (mostrarFotoYCadena && !mostrarDedicatoria) {
+        // Mostrar foto + frase con máquina de escribir
+        document.getElementById("foto").style.display = "block";
+
+        if (millis() - tiempoMostrarFoto > duracionFotoMS) {
+          // Terminar foto y pasar a dedicatoria
+          mostrarFotoYCadena = false;
+          mostrarDedicatoria = true;
+          textoVisible = "";
+          indexLetra = 0;
+          tiempoEscritura = millis();
+          crearParticulas();
+          document.getElementById("foto").style.display = "none";
+          return;
+        }
+
+        if (millis() - tiempoEscrituraFoto > velocidadEscrituraFoto && indexLetraFoto < fraseFoto.length) {
+          textoVisibleFoto += fraseFoto[indexLetraFoto];
+          indexLetraFoto++;
+          tiempoEscrituraFoto = millis();
+        }
+
+        // Color dinámico para frase foto
+        while (coloresPorLetraFoto.length < textoVisibleFoto.length) {
+          coloresPorLetraFoto.push(random(coloresTexto));
+        }
+        while (coloresPorLetraFoto.length > textoVisibleFoto.length) {
+          coloresPorLetraFoto.pop();
+        }
+
+        if (frameCount % 4 === 0) {
+          for (let i = 0; i < coloresPorLetraFoto.length; i++) {
+            coloresPorLetraFoto[i] = random(coloresTexto);
+          }
+        }
+
+        // Renderizar frase foto debajo de imagen
+        let spanHTML = "";
+        for (let i = 0; i < textoVisibleFoto.length; i++) {
+          spanHTML += `<span style="color:${coloresPorLetraFoto[i]}">${textoVisibleFoto[i]}</span>`;
+        }
+        document.getElementById("dedicatoria").innerHTML = spanHTML;
+      }
+      
+      else if (mostrarDedicatoria) {
+        // Máquina de escribir dedicatoria
+        if (!borrandoFinal && !borrando && !esperando && millis() - tiempoEscritura > velocidadEscritura && indexLetra < textoBase.length) {
+          textoVisible += textoBase[indexLetra];
+          indexLetra++;
+          tiempoEscritura = millis();
+        }
+
+        for (let parte of partesABorrar) {
+          if (!parte.borrado && textoVisible.includes(parte.texto)) {
+            borrarDesde = textoVisible.lastIndexOf(parte.texto);
+            esperando = true;
+            tiempoEspera = millis();
+            parte.borrado = true;
+            break;
+          }
+        }
+
+        if (esperando && millis() - tiempoEspera >= 1300) {
+          borrando = true;
+          esperando = false;
+        }
+
+        if (borrando && millis() - tiempoEscritura > velocidadEscritura) {
+          textoVisible = textoVisible.slice(0, textoVisible.length - 1);
+          tiempoEscritura = millis();
+          if (textoVisible.length <= borrarDesde) {
+            borrando = false;
+          }
+        }
+
+        // Control colores dedicatoria
+        while (coloresPorLetra.length < textoVisible.length) {
+          coloresPorLetra.push(random(coloresTexto));
+        }
+        while (coloresPorLetra.length > textoVisible.length) {
+          coloresPorLetra.pop();
+        }
+
+        if (frameCount % 4 === 0) {
+          for (let i = 0; i < coloresPorLetra.length; i++) {
+            coloresPorLetra[i] = random(coloresTexto);
+          }
+        }
+
+        let dedicatoriaHTML = "";
+        for (let i = 0; i < textoVisible.length; i++) {
+          dedicatoriaHTML += `<span style="color:${coloresPorLetra[i]}">${textoVisible[i]}</span>`;
+        }
+        document.getElementById("dedicatoria").innerHTML = dedicatoriaHTML;
+
+        document.getElementById("foto").style.display = "none";
+      }
+    }
+  </script>
+</body>
+</html>
