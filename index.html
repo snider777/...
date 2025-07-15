@@ -63,11 +63,11 @@
   <audio id="bgMusic" src="take-on-me.mp3" preload="auto"></audio>
   <div id="scrollContainer">
     <img id="foto" src="imagen.jpg" alt="Imagen" />
-    <!-- Video tag vacío - lo crearemos y controlaremos con p5.js -->
     <video id="video" playsinline webkit-playsinline muted></video>
     <div id="dedicatoria"></div>
   </div>
   <script>
+    // Variables generales
     let frases = ["Haz click", "Hasta llegar a 30"];
     let clickCount = 0;
     let fraseIndex = 0;
@@ -77,15 +77,15 @@
     let mostrarDedicatoria = false;
     let musicaIniciada = false;
 
-    let textoBase = "Háblame por interno para más detalles 906 270 679 ... Esta es la parte de la dedicatoria, lo cual lo hace bastante especial, tú pásame lo que quieres que se escriba y tal y como se esta escribiendo esto se escribirá tu mensaje ... Los colores del texto, la velocidad de escritura, La cantidad de clicks para cambiar de frase o para la dedicatoria pueden cambiar a tu gusto ... Todo esto que ves es 100% personalizable ... Así que imagina las posibilidades ... Una declaración ... Un regalo de cumpleaños ... Algo para el día de tu cumplemes con tu pareja ... O simplemente un pequeño detalle ... Puedes verlo las veces que quieras ... También puedo hacer que ciertas partes del texto se borren una vez hayan sido escritas ... Como esa ... O como esa ... El límite es tu imaginación ... :)";
-
+    // Dedicatoria personalizada
+    let textoBase = "Háblame por interno para más detalles 906 270 679 ... Esta es la parte de la dedicatoria, lo cual lo hace bastante especial...";
     let textoVisible = "";
     let indexLetra = 0;
     let tiempoEscritura = 0;
     const velocidadEscritura = 100;
     let coloresTexto = ["#ff8080", "#ff4da6", "#ff00ff"];
 
-    // Para frases y tiempos imagen/video
+    // Frase para foto
     let fraseFoto = "Mi niña de ojos bonitos";
     let textoVisibleFoto = "";
     let indexLetraFoto = 0;
@@ -94,12 +94,12 @@
     let tiempoMostrarFoto = 0;
     const duracionFotoMS = 7000; // 7 segundos
 
+    // Frase para video
     let fraseVideo = "Mujer hermosa";
     let textoVisibleVideo = "";
     let indexLetraVideo = 0;
     let tiempoEscrituraVideo = 0;
     const velocidadEscrituraVideo = 100;
-    let tiempoMostrarVideo = 0;
 
     // Partículas
     let particulas = [];
@@ -108,9 +108,17 @@
     let coloresPorLetraVideo = [];
 
     // Elementos DOM
-    let fotoElem;
-    let videoElem;
-    let dedicatoriaElem;
+    let fotoElem, videoElem, dedicatoriaElem;
+
+    // Funcion para convertir hex a RGB
+    function hexToRgb(hex) {
+      const res = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+      return res ? {
+        r: parseInt(res[1], 16),
+        g: parseInt(res[2], 16),
+        b: parseInt(res[3], 16)
+      } : null;
+    }
 
     function crearParticulas() {
       particulas = [];
@@ -126,16 +134,6 @@
         });
       }
     }
-
-    function hexToRgb(hex) {
-      const res = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-      return res ? {
-        r: parseInt(res[1], 16),
-        g: parseInt(res[2], 16),
-        b: parseInt(res[3], 16)
-      } : null;
-    }
-
     function moverYdibujarParticulas() {
       for (let p of particulas) {
         p.x += p.dx;
@@ -163,19 +161,16 @@
       textFont('Poppins');
       crearParticulas();
 
-      // Obtener referencias DOM
       fotoElem = document.getElementById('foto');
       videoElem = document.getElementById('video');
       dedicatoriaElem = document.getElementById('dedicatoria');
 
-      // Configurar video
-      videoElem.src = 'video1.mp4';
-      videoElem.loop = false;
+      // Configurar video para autoplay/muted
       videoElem.muted = true;
       videoElem.playsInline = true;
       videoElem.style.display = 'none';
 
-      videoElem.onended(() => {
+      videoElem.onended = function() {
         mostrarVideoYCadena = false;
         mostrarDedicatoria = true;
         textoVisible = "";
@@ -184,7 +179,7 @@
         crearParticulas();
         videoElem.style.display = 'none';
         dedicatoriaElem.style.pointerEvents = 'auto';
-      });
+      }
     }
 
     function windowResized() {
@@ -296,9 +291,15 @@
           tiempoEscrituraVideo = millis();
           fotoElem.style.display = 'none';
           videoElem.style.display = 'block';
-          videoElem.play();
+
+          videoElem.muted = true;
+          let playPromise = videoElem.play();
+          if (playPromise !== undefined) {
+            playPromise.catch(() => {});
+          }
+
           dedicatoriaElem.innerHTML = "";
-          dedicatoriaElem.style.pointerEvents = 'none'; // evita interacción mientras se escribe
+          dedicatoriaElem.style.pointerEvents = 'none';
           crearParticulas();
           return;
         }
@@ -350,6 +351,7 @@
             coloresPorLetraVideo[i] = random(coloresTexto);
           }
         }
+
         let spanHTML = "";
         for (let i = 0; i < textoVisibleVideo.length; i++) {
           spanHTML += `<span style="color:${coloresPorLetraVideo[i]}">${textoVisibleVideo[i]}</span>`;
@@ -365,29 +367,7 @@
           indexLetra++;
           tiempoEscritura = millis();
         }
-
-        for (let parte of partesABorrar) {
-          if (!parte.borrado && textoVisible.includes(parte.texto)) {
-            borrarDesde = textoVisible.lastIndexOf(parte.texto);
-            esperando = true;
-            tiempoEspera = millis();
-            parte.borrado = true;
-            break;
-          }
-        }
-
-        if (esperando && millis() - tiempoEspera >= 1300) {
-          borrando = true;
-          esperando = false;
-        }
-
-        if (borrando && millis() - tiempoEscritura > velocidadEscritura) {
-          textoVisible = textoVisible.slice(0, textoVisible.length - 1);
-          tiempoEscritura = millis();
-          if (textoVisible.length <= borrarDesde) {
-            borrando = false;
-          }
-        }
+        // No se borran partes para simplificar aquí
 
         while (coloresPorLetra.length < textoVisible.length) {
           coloresPorLetra.push(random(coloresTexto));
