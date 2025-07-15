@@ -51,13 +51,12 @@
       display: block;
     }
   </style>
-  <!-- Cargamos p5.js y p5.sound para audio -->
+  <!-- Librerías p5.js y p5.sound -->
   <script src="https://cdn.jsdelivr.net/npm/p5@1.7.0/lib/p5.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/p5@1.7.0/lib/addons/p5.sound.min.js"></script>
 </head>
 <body>
   <div id="scrollContainer">
-    <!-- Imagen que cambia según estado -->
     <img id="imagenDisplay" src="" alt="" style="display:none" />
     <div id="textoImagen" style="color:#ff4da6; font-weight:600; margin-top:10px; min-height:30px;"></div>
     <div id="dedicatoria"></div>
@@ -72,7 +71,6 @@
 
     let mostrarSecuenciaImagenes = false;
     let indiceImagenActual = 0;
-    // Array con objeto {src, texto, duracionMS}
     const secuenciaImagenes = [
       { src: "imagen.jpg", texto: "Mi niña de ojos bonitos", duracion: 6000 },
       { src: "imagen2.jpg", texto: "Extraño a esa loquita :(", duracion: 8000 },
@@ -90,11 +88,10 @@
     let coloresTexto = ["#ff8080", "#ff4da6", "#ff00ff"];
     let coloresPorLetra = [];
 
-    // Sonido p5.sound
+    // Audio p5.sound
     let bgMusic;
     let musicaIniciada = false;
 
-    // Elementos DOM
     const imagenDisplay = document.getElementById("imagenDisplay");
     const textoImagen = document.getElementById("textoImagen");
     const dedicatoriaElem = document.getElementById("dedicatoria");
@@ -155,7 +152,6 @@
       textAlign(CENTER, CENTER);
       textFont('Poppins');
       crearParticulas();
-
     }
 
     function windowResized() {
@@ -185,14 +181,12 @@
           mostrarSecuenciaImagenes = true;
           tiempoInicioImagen = millis();
           indiceImagenActual = 0;
-          // Inicializar primera imagen
           imagenDisplay.src = secuenciaImagenes[0].src;
           imagenDisplay.style.display = "block";
           textoImagen.textContent = secuenciaImagenes[0].texto;
           dedicatoriaElem.textContent = "";
           crearParticulas();
         }
-        // Explosión de gotas en click
         for(let i=0; i < 20; i++){
           let ang = random(TWO_PI);
           let speed = random(2,6);
@@ -214,7 +208,6 @@
       moverYdibujarParticulas();
 
       if(!mostrarSecuenciaImagenes && !mostrarDedicatoria){
-        // Lluvia frases
         textAlign(CENTER, CENTER);
         textSize(24);
 
@@ -258,7 +251,6 @@
         dedicatoriaElem.textContent = "";
         
       }else if(mostrarSecuenciaImagenes){
-        // Mostrar imagen y texto ciclo
         let tiempoPasado = millis() - tiempoInicioImagen;
         let current = secuenciaImagenes[indiceImagenActual];
         
@@ -269,7 +261,6 @@
         if(tiempoPasado >= current.duracion){
           indiceImagenActual++;
           if(indiceImagenActual >= secuenciaImagenes.length){
-            // Termina secuencia imágenes → dedicatoria
             mostrarSecuenciaImagenes = false;
             mostrarDedicatoria = true;
             textoVisible = "";
@@ -279,7 +270,6 @@
             textoImagen.textContent = "";
             crearParticulas();
           }else{
-            // Siguiente imagen
             tiempoInicioImagen = millis();
             imagenDisplay.src = secuenciaImagenes[indiceImagenActual].src;
             textoImagen.textContent = secuenciaImagenes[indiceImagenActual].texto;
@@ -317,3 +307,4 @@
   </script>
 </body>
 </html>
+     
