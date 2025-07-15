@@ -59,8 +59,8 @@
 <body>
   <audio id="bgMusic" src="take-on-me.mp3" preload="auto"></audio>
   <div id="scrollContainer">
-    <img id="foto" src="imagen1.jpg" alt="Imagen" />
-    <div id="dedicatoria">Hola :D</div>
+    <img id="foto" src="imagen.jpg" alt="Imagen" />
+    <div id="dedicatoria"></div>
   </div>
   <script>
     let frases = ["Haz click", "Hasta llegar a 30"];
@@ -69,10 +69,9 @@
     let gotas = [];
     let mostrarFotoYCadena = false;
     let mostrarDedicatoria = false;
-    let mensajeFinalizado = false;
     let musicaIniciada = false;
 
-    let textoBase = "Hola :D"; // La dedicatoria simple modificada
+    let textoBase = "Háblame por interno para más detalles 906 270 679 ... Esta es la parte de la dedicatoria, lo cual lo hace bastante especial, tú pásame lo que quieres que se escriba y tal y como se esta escribiendo esto se escribirá tu mensaje ... Los colores del texto, la velocidad de escritura, La cantidad de clicks para cambiar de frase o para la dedicatoria pueden cambiar a tu gusto ... Todo esto que ves es 100% personalizable ... Así que imagina las posibilidades ... Una declaración ... Un regalo de cumpleaños ... Algo para el día de tu cumplemes con tu pareja ... O simplemente un pequeño detalle ... Puedes verlo las veces que quieras ... También puedo hacer que ciertas partes del texto se borren una vez hayan sido escritas ... Como esa ... O como esa ... El límite es tu imaginación ... :)";
 
     let textoVisible = "";
     let indexLetra = 0;
@@ -85,7 +84,12 @@
     let borrandoFinal = false;
     let coloresTexto = ["#ff8080", "#ff4da6", "#ff00ff"];
 
-    // Frase para la foto
+    let partesABorrar = [
+      { texto: "También puedo hacer que ciertas partes del texto se borren una vez hayan sido escritas ...", borrado: false },
+      { texto: " Como esa ...", borrado: false }
+    ];
+
+    // Frase y duración para la foto
     let fraseFoto = "Mi niña de ojos bonitos";
     let textoVisibleFoto = "";
     let indexLetraFoto = 0;
@@ -94,6 +98,7 @@
     let tiempoMostrarFoto = 0;
     const duracionFotoMS = 7000; // 7 segundos
 
+    // PARTICULAS
     let particulas = [];
     let particulasLluviaActiva = true;
 
@@ -253,7 +258,7 @@
         }
 
         document.getElementById("foto").style.display = "none";
-        document.getElementById("dedicatoria").innerHTML = "Hola :D";
+        document.getElementById("dedicatoria").innerHTML = ""; // <-- No mostrar texto acá
       }
       else if (mostrarFotoYCadena && !mostrarDedicatoria) {
         document.getElementById("foto").style.display = "block";
@@ -301,9 +306,29 @@
           tiempoEscritura = millis();
         }
 
-        // Ya que el texto de la dedicatoria fue reemplazado con "Hola :D" se puede omitir la lógica borra partes.
+        for (let parte of partesABorrar) {
+          if (!parte.borrado && textoVisible.includes(parte.texto)) {
+            borrarDesde = textoVisible.lastIndexOf(parte.texto);
+            esperando = true;
+            tiempoEspera = millis();
+            parte.borrado = true;
+            break;
+          }
+        }
 
-        // Aseguramos tamaño del array de colores
+        if (esperando && millis() - tiempoEspera >= 1300) {
+          borrando = true;
+          esperando = false;
+        }
+
+        if (borrando && millis() - tiempoEscritura > velocidadEscritura) {
+          textoVisible = textoVisible.slice(0, textoVisible.length - 1);
+          tiempoEscritura = millis();
+          if (textoVisible.length <= borrarDesde) {
+            borrando = false;
+          }
+        }
+
         while (coloresPorLetra.length < textoVisible.length) {
           coloresPorLetra.push(random(coloresTexto));
         }
