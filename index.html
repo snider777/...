@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>Modelo Lluvia Frases, Imagen y Video</title>
+  <title>Modelo Lluvia Frases e Imagen</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
   <style>
     html, body {
@@ -29,13 +29,13 @@
       z-index: 2;
     }
     #dedicatoria {
-      padding: 40px 0 0 0;
+      padding: 40px 0 0;
       font-size: 20px;
       white-space: pre-wrap;
       max-width: 800px;
       min-height: 32px;
     }
-    #foto, #video {
+    #foto {
       max-width: 80vw;
       max-height: 60vh;
       border-radius: 10px;
@@ -52,10 +52,6 @@
       z-index: 0;
       pointer-events: none;
     }
-    video {
-      outline: none;
-      border-radius: 10px;
-    }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/p5@1.7.0/lib/p5.min.js"></script>
 </head>
@@ -63,62 +59,39 @@
   <audio id="bgMusic" src="take-on-me.mp3" preload="auto"></audio>
   <div id="scrollContainer">
     <img id="foto" src="imagen.jpg" alt="Imagen" />
-    <video id="video" playsinline webkit-playsinline muted></video>
     <div id="dedicatoria"></div>
   </div>
   <script>
-    // Variables generales
     let frases = ["Haz click", "Hasta llegar a 30"];
     let clickCount = 0;
     let fraseIndex = 0;
     let gotas = [];
     let mostrarFotoYCadena = false;
-    let mostrarVideoYCadena = false;
     let mostrarDedicatoria = false;
     let musicaIniciada = false;
 
-    // Dedicatoria personalizada
-    let textoBase = "Háblame por interno para más detalles 906 270 679 ... Esta es la parte de la dedicatoria, lo cual lo hace bastante especial...";
+    let textoBase = "Háblame por interno para más detalles 906 270 679 ... Esta es la parte de la dedicatoria, lo cual lo hace bastante especial, tú pásame lo que quieres que se escriba y tal y como se esta escribiendo esto se escribirá tu mensaje ... Los colores del texto, la velocidad de escritura, La cantidad de clicks para cambiar de frase o para la dedicatoria pueden cambiar a tu gusto ... Todo esto que ves es 100% personalizable ... Así que imagina las posibilidades ... Una declaración ... Un regalo de cumpleaños ... Algo para el día de tu cumplemes con tu pareja ... O simplemente un pequeño detalle ... Puedes verlo las veces que quieras ... También puedo hacer que ciertas partes del texto se borren una vez hayan sido escritas ... Como esa ... O como esa ... El límite es tu imaginación ... :)";
+
     let textoVisible = "";
     let indexLetra = 0;
     let tiempoEscritura = 0;
     const velocidadEscritura = 100;
     let coloresTexto = ["#ff8080", "#ff4da6", "#ff00ff"];
 
-    // Frase para foto
     let fraseFoto = "Mi niña de ojos bonitos";
     let textoVisibleFoto = "";
     let indexLetraFoto = 0;
     let tiempoEscrituraFoto = 0;
     const velocidadEscrituraFoto = 100;
     let tiempoMostrarFoto = 0;
-    const duracionFotoMS = 7000; // 7 segundos
+    const duracionFotoMS = 7000;
 
-    // Frase para video
-    let fraseVideo = "Mujer hermosa";
-    let textoVisibleVideo = "";
-    let indexLetraVideo = 0;
-    let tiempoEscrituraVideo = 0;
-    const velocidadEscrituraVideo = 100;
-
-    // Partículas
     let particulas = [];
     let coloresPorLetra = [];
     let coloresPorLetraFoto = [];
-    let coloresPorLetraVideo = [];
 
-    // Elementos DOM
-    let fotoElem, videoElem, dedicatoriaElem;
-
-    // Funcion para convertir hex a RGB
-    function hexToRgb(hex) {
-      const res = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-      return res ? {
-        r: parseInt(res[1], 16),
-        g: parseInt(res[2], 16),
-        b: parseInt(res[3], 16)
-      } : null;
-    }
+    let fotoElem;
+    let dedicatoriaElem;
 
     function crearParticulas() {
       particulas = [];
@@ -134,6 +107,16 @@
         });
       }
     }
+
+    function hexToRgb(hex) {
+      const res = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+      return res ? {
+        r: parseInt(res[1], 16),
+        g: parseInt(res[2], 16),
+        b: parseInt(res[3], 16)
+      } : null;
+    }
+
     function moverYdibujarParticulas() {
       for (let p of particulas) {
         p.x += p.dx;
@@ -162,24 +145,7 @@
       crearParticulas();
 
       fotoElem = document.getElementById('foto');
-      videoElem = document.getElementById('video');
       dedicatoriaElem = document.getElementById('dedicatoria');
-
-      // Configurar video para autoplay/muted
-      videoElem.muted = true;
-      videoElem.playsInline = true;
-      videoElem.style.display = 'none';
-
-      videoElem.onended = function() {
-        mostrarVideoYCadena = false;
-        mostrarDedicatoria = true;
-        textoVisible = "";
-        indexLetra = 0;
-        tiempoEscritura = millis();
-        crearParticulas();
-        videoElem.style.display = 'none';
-        dedicatoriaElem.style.pointerEvents = 'auto';
-      }
     }
 
     function windowResized() {
@@ -195,7 +161,8 @@
         document.getElementById("bgMusic").play();
         musicaIniciada = true;
       }
-      if (!mostrarFotoYCadena && !mostrarVideoYCadena && !mostrarDedicatoria) {
+
+      if (!mostrarFotoYCadena && !mostrarDedicatoria) {
         clickCount++;
         if (clickCount % 2 === 0) {
           fraseIndex = (fraseIndex + 1) % frases.length;
@@ -208,8 +175,8 @@
           tiempoMostrarFoto = millis();
           textoVisibleFoto = "";
           indexLetraFoto = 0;
-          fotoElem.style.display = 'block';
-          dedicatoriaElem.style.pointerEvents = 'auto';
+          fotoElem.style.display = "block";
+          dedicatoriaElem.style.pointerEvents = "auto";
           crearParticulas();
         }
         for (let i = 0; i < 20; i++) {
@@ -232,8 +199,7 @@
       background(0, 100);
       moverYdibujarParticulas();
 
-      if (!mostrarFotoYCadena && !mostrarVideoYCadena && !mostrarDedicatoria) {
-        // Lluvia de frases
+      if (!mostrarFotoYCadena && !mostrarDedicatoria) {
         textAlign(CENTER, CENTER);
         textSize(24);
         if (frameCount % 8 === 0) {
@@ -275,31 +241,19 @@
           }
         }
 
-        fotoElem.style.display = 'none';
-        videoElem.style.display = 'none';
+        fotoElem.style.display = "none";
         dedicatoriaElem.innerHTML = "";
       }
       else if (mostrarFotoYCadena) {
-        fotoElem.style.display = 'block';
-        videoElem.style.display = 'none';
+        fotoElem.style.display = "block";
 
         if (millis() - tiempoMostrarFoto > duracionFotoMS) {
           mostrarFotoYCadena = false;
-          mostrarVideoYCadena = true;
-          textoVisibleVideo = "";
-          indexLetraVideo = 0;
-          tiempoEscrituraVideo = millis();
-          fotoElem.style.display = 'none';
-          videoElem.style.display = 'block';
-
-          videoElem.muted = true;
-          let playPromise = videoElem.play();
-          if (playPromise !== undefined) {
-            playPromise.catch(() => {});
-          }
-
-          dedicatoriaElem.innerHTML = "";
-          dedicatoriaElem.style.pointerEvents = 'none';
+          mostrarDedicatoria = true;
+          textoVisible = "";
+          indexLetra = 0;
+          tiempoEscritura = millis();
+          fotoElem.style.display = "none";
           crearParticulas();
           return;
         }
@@ -329,45 +283,14 @@
         }
         dedicatoriaElem.innerHTML = spanHTML;
       }
-      else if (mostrarVideoYCadena) {
-        fotoElem.style.display = 'none';
-        videoElem.style.display = 'block';
-
-        if (millis() - tiempoEscrituraVideo > velocidadEscrituraVideo && indexLetraVideo < fraseVideo.length) {
-          textoVisibleVideo += fraseVideo[indexLetraVideo];
-          indexLetraVideo++;
-          tiempoEscrituraVideo = millis();
-        }
-
-        while (coloresPorLetraVideo.length < textoVisibleVideo.length) {
-          coloresPorLetraVideo.push(random(coloresTexto));
-        }
-        while (coloresPorLetraVideo.length > textoVisibleVideo.length) {
-          coloresPorLetraVideo.pop();
-        }
-
-        if (frameCount % 4 === 0) {
-          for (let i = 0; i < coloresPorLetraVideo.length; i++) {
-            coloresPorLetraVideo[i] = random(coloresTexto);
-          }
-        }
-
-        let spanHTML = "";
-        for (let i = 0; i < textoVisibleVideo.length; i++) {
-          spanHTML += `<span style="color:${coloresPorLetraVideo[i]}">${textoVisibleVideo[i]}</span>`;
-        }
-        dedicatoriaElem.innerHTML = spanHTML;
-      }
       else if (mostrarDedicatoria) {
-        fotoElem.style.display = 'none';
-        videoElem.style.display = 'none';
+        fotoElem.style.display = "none";
 
-        if (!borrandoFinal && !borrando && !esperando && millis() - tiempoEscritura > velocidadEscritura && indexLetra < textoBase.length) {
+        if (millis() - tiempoEscritura > velocidadEscritura && indexLetra < textoBase.length) {
           textoVisible += textoBase[indexLetra];
           indexLetra++;
           tiempoEscritura = millis();
         }
-        // No se borran partes para simplificar aquí
 
         while (coloresPorLetra.length < textoVisible.length) {
           coloresPorLetra.push(random(coloresTexto));
@@ -387,7 +310,6 @@
           dedicatoriaHTML += `<span style="color:${coloresPorLetra[i]}">${textoVisible[i]}</span>`;
         }
         dedicatoriaElem.innerHTML = dedicatoriaHTML;
-        dedicatoriaElem.style.pointerEvents = 'auto';
       }
     }
   </script>
