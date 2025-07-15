@@ -51,10 +51,11 @@
       display: block;
     }
   </style>
+  <!-- Cargamos p5.js y p5.sound para audio -->
   <script src="https://cdn.jsdelivr.net/npm/p5@1.7.0/lib/p5.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/p5@1.7.0/lib/addons/p5.sound.min.js"></script>
 </head>
 <body>
-  <audio id="bgMusic" src="tu_y_yo.mp3" preload="auto"></audio>
   <div id="scrollContainer">
     <!-- Imagen que cambia según estado -->
     <img id="imagenDisplay" src="" alt="" style="display:none" />
@@ -88,6 +89,10 @@
     const velocidadEscritura = 100;
     let coloresTexto = ["#ff8080", "#ff4da6", "#ff00ff"];
     let coloresPorLetra = [];
+
+    // Sonido p5.sound
+    let bgMusic;
+    let musicaIniciada = false;
 
     // Elementos DOM
     const imagenDisplay = document.getElementById("imagenDisplay");
@@ -137,6 +142,10 @@
       }
     }
 
+    function preload(){
+      bgMusic = loadSound('tu_y_yo.mp3');
+    }
+
     function setup() {
       createCanvas(windowWidth, windowHeight);
       let c=document.querySelector("canvas");
@@ -158,10 +167,10 @@
     }
 
     function mousePressed() {
-      if(clickCount === 0){ 
-        // El audio arranca en primer click
-        const audio = document.getElementById("bgMusic");
-        audio.play();
+      if(!musicaIniciada){
+        bgMusic.setLoop(true);
+        bgMusic.play();
+        musicaIniciada = true;
       }
       clickCount++;
 
