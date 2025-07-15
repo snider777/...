@@ -122,19 +122,33 @@
       }
     }
 
-    function moverYdibujarParticulas() {
-      for (let p of particulas) {
-        p.x += p.dx;
-        p.y += p.dy;
+    function hexToRgb(hex) {
+  let res = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return res ? {
+    r: parseInt(res[1], 16),
+    g: parseInt(res[2], 16),
+    b: parseInt(res[3], 16)
+  } : null;
+}
 
-        if (p.x < 0 || p.x > width) p.dx *= -1;
-        if (p.y < 0 || p.y > height) p.dy *= -1;
+function moverYdibujarParticulas() {
+  for (let p of particulas) {
+    p.x += p.dx;
+    p.y += p.dy;
 
-        fill(p.color + hex(Math.floor(p.alpha), 2));
-        noStroke();
-        ellipse(p.x, p.y, p.size);
-      }
+    if (p.x < 0 || p.x > width) p.dx *= -1;
+    if (p.y < 0 || p.y > height) p.dy *= -1;
+
+    let c = hexToRgb(p.color);
+    if (c) {
+      fill(c.r, c.g, c.b, p.alpha);
+    } else {
+      fill(255, p.alpha);
     }
+    noStroke();
+    ellipse(p.x, p.y, p.size);
+  }
+}
 
     function setup() {
       createCanvas(windowWidth, windowHeight);
