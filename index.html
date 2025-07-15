@@ -3,11 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>Modelo</title>
+  <title>Modelo Lluvia Frases & Dedicatoria</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
   <style>
-    body {
+    html, body {
       margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
       overflow: hidden;
       background: black;
       color: white;
@@ -19,7 +22,6 @@
       left: 0;
       width: 100vw;
       height: 100vh;
-      overflow-y: auto;
       pointer-events: none;
       display: flex;
       justify-content: center;
@@ -28,12 +30,14 @@
       text-align: center;
       padding: 40px;
       font-size: 20px;
+      z-index: 2;
     }
     #dedicatoria {
-      padding: 40px;
+      padding: 40px 0 0 0;
       font-size: 20px;
       white-space: pre-wrap;
       max-width: 800px;
+      min-height: 32px;
     }
     #foto {
       max-width: 80vw;
@@ -42,6 +46,7 @@
       border-radius: 10px;
       margin-bottom: 20px;
       box-shadow: 0 0 20px #ff4da6;
+      background: #111;
     }
     canvas {
       display: block;
@@ -50,7 +55,7 @@
       left: 0;
       width: 100vw !important;
       height: 100vh !important;
-      z-index: -1;
+      z-index: 0;
       pointer-events: none;
     }
   </style>
@@ -63,7 +68,8 @@
     <div id="dedicatoria"></div>
   </div>
   <script>
-    let frases = ["Haz click", "Hasta llegar a 30"];
+    // --- Configuración iniciales
+    let frases = ["19/04/2025", "Princesita 🥀"];
     let clickCount = 0;
     let fraseIndex = 0;
     let gotas = [];
@@ -71,7 +77,8 @@
     let mostrarDedicatoria = false;
     let musicaIniciada = false;
 
-    let textoBase = "Háblame por interno para más detalles 906 270 679 ... Esta es la parte de la dedicatoria, lo cual lo hace bastante especial, tú pásame lo que quieres que se escriba y tal y como se esta escribiendo esto se escribirá tu mensaje ... Los colores del texto, la velocidad de escritura, La cantidad de clicks para cambiar de frase o para la dedicatoria pueden cambiar a tu gusto ... Todo esto que ves es 100% personalizable ... Así que imagina las posibilidades ... Una declaración ... Un regalo de cumpleaños ... Algo para el día de tu cumplemes con tu pareja ... O simplemente un pequeño detalle ... Puedes verlo las veces que quieras ... También puedo hacer que ciertas partes del texto se borren una vez hayan sido escritas ... Como esa ... O como esa ... El límite es tu imaginación ... :)";
+    // Dedicatoria personalizada (puedes cambiar este texto)
+    let textoBase = "textoooo blablabla ...";
 
     let textoVisible = "";
     let indexLetra = 0;
@@ -89,7 +96,7 @@
       { texto: " Como esa ...", borrado: false }
     ];
 
-    // Frase y duración para la foto
+    // Para la imagen y frase centrada
     let fraseFoto = "Mi niña de ojos bonitos";
     let textoVisibleFoto = "";
     let indexLetraFoto = 0;
@@ -98,10 +105,8 @@
     let tiempoMostrarFoto = 0;
     const duracionFotoMS = 7000; // 7 segundos
 
-    // PARTICULAS
+    // Partículas animadas
     let particulas = [];
-    let particulasLluviaActiva = true;
-
     let coloresPorLetra = [];
     let coloresPorLetraFoto = [];
 
@@ -133,10 +138,8 @@
       for (let p of particulas) {
         p.x += p.dx;
         p.y += p.dy;
-
         if (p.x < 0 || p.x > width) p.dx *= -1;
         if (p.y < 0 || p.y > height) p.dy *= -1;
-
         let c = hexToRgb(p.color);
         if (c) {
           fill(c.r, c.g, c.b, p.alpha);
@@ -173,7 +176,6 @@
         audio.play();
         musicaIniciada = true;
       }
-
       if (!mostrarFotoYCadena && !mostrarDedicatoria) {
         clickCount++;
         if (clickCount % 2 === 0) {
@@ -191,7 +193,6 @@
           document.getElementById("scrollContainer").style.pointerEvents = "auto";
           crearParticulas();
         }
-
         for (let i = 0; i < 20; i++) {
           let ang = random(TWO_PI);
           let speed = random(2, 6);
@@ -210,10 +211,7 @@
 
     function draw() {
       background(0, 100);
-
-      if (particulasLluviaActiva) {
-        moverYdibujarParticulas();
-      }
+      moverYdibujarParticulas();
 
       if (!mostrarFotoYCadena && !mostrarDedicatoria) {
         textAlign(CENTER, CENTER);
@@ -231,7 +229,6 @@
             explosion: false
           });
         }
-
         for (let i = gotas.length - 1; i >= 0; i--) {
           let g = gotas[i];
           let color = random(coloresTexto);
@@ -242,7 +239,6 @@
             fill(255, g.alpha);
           }
           text(g.texto, g.x, g.y);
-
           if (g.explosion) {
             g.x += g.dx;
             g.y += g.dy;
@@ -251,18 +247,15 @@
             g.y += g.speed;
             g.alpha -= 1.5;
           }
-
           if (g.alpha <= 0 || g.y > height + 50) {
             gotas.splice(i, 1);
           }
         }
-
         document.getElementById("foto").style.display = "none";
-        document.getElementById("dedicatoria").innerHTML = ""; // <-- No mostrar texto acá
+        document.getElementById("dedicatoria").innerHTML = ""; // NO mostrar texto durante lluvia
       }
       else if (mostrarFotoYCadena && !mostrarDedicatoria) {
         document.getElementById("foto").style.display = "block";
-
         if (millis() - tiempoMostrarFoto > duracionFotoMS) {
           mostrarFotoYCadena = false;
           mostrarDedicatoria = true;
@@ -273,26 +266,22 @@
           document.getElementById("foto").style.display = "none";
           return;
         }
-
         if (millis() - tiempoEscrituraFoto > velocidadEscrituraFoto && indexLetraFoto < fraseFoto.length) {
           textoVisibleFoto += fraseFoto[indexLetraFoto];
           indexLetraFoto++;
           tiempoEscrituraFoto = millis();
         }
-
         while (coloresPorLetraFoto.length < textoVisibleFoto.length) {
           coloresPorLetraFoto.push(random(coloresTexto));
         }
         while (coloresPorLetraFoto.length > textoVisibleFoto.length) {
           coloresPorLetraFoto.pop();
         }
-
         if (frameCount % 4 === 0) {
           for (let i = 0; i < coloresPorLetraFoto.length; i++) {
             coloresPorLetraFoto[i] = random(coloresTexto);
           }
         }
-
         let spanHTML = "";
         for (let i = 0; i < textoVisibleFoto.length; i++) {
           spanHTML += `<span style="color:${coloresPorLetraFoto[i]}">${textoVisibleFoto[i]}</span>`;
@@ -305,7 +294,6 @@
           indexLetra++;
           tiempoEscritura = millis();
         }
-
         for (let parte of partesABorrar) {
           if (!parte.borrado && textoVisible.includes(parte.texto)) {
             borrarDesde = textoVisible.lastIndexOf(parte.texto);
@@ -315,12 +303,10 @@
             break;
           }
         }
-
         if (esperando && millis() - tiempoEspera >= 1300) {
           borrando = true;
           esperando = false;
         }
-
         if (borrando && millis() - tiempoEscritura > velocidadEscritura) {
           textoVisible = textoVisible.slice(0, textoVisible.length - 1);
           tiempoEscritura = millis();
@@ -328,26 +314,22 @@
             borrando = false;
           }
         }
-
         while (coloresPorLetra.length < textoVisible.length) {
           coloresPorLetra.push(random(coloresTexto));
         }
         while (coloresPorLetra.length > textoVisible.length) {
           coloresPorLetra.pop();
         }
-
         if (frameCount % 4 === 0) {
           for (let i = 0; i < coloresPorLetra.length; i++) {
             coloresPorLetra[i] = random(coloresTexto);
           }
         }
-
         let dedicatoriaHTML = "";
         for (let i = 0; i < textoVisible.length; i++) {
           dedicatoriaHTML += `<span style="color:${coloresPorLetra[i]}">${textoVisible[i]}</span>`;
         }
         document.getElementById("dedicatoria").innerHTML = dedicatoriaHTML;
-
         document.getElementById("foto").style.display = "none";
       }
     }
