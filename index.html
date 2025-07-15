@@ -6,11 +6,8 @@
   <title>Modelo</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
   <style>
-    html, body {
+    body {
       margin: 0;
-      padding: 0;
-      width: 100%;
-      height: 100%;
       overflow: hidden;
       background: black;
       color: white;
@@ -33,9 +30,10 @@
       font-size: 20px;
     }
     #dedicatoria {
+      padding: 40px;
+      font-size: 20px;
       white-space: pre-wrap;
       max-width: 800px;
-      margin-top: 20px;
     }
     #foto {
       max-width: 80vw;
@@ -61,11 +59,11 @@
 <body>
   <audio id="bgMusic" src="take-on-me.mp3" preload="auto"></audio>
   <div id="scrollContainer">
-    <img id="foto" src="foto1.jpg" alt="Foto" />
-    <div id="dedicatoria"></div>
+    <img id="foto" src="imagen1.jpg" alt="Imagen" />
+    <div id="dedicatoria">Hola :D</div>
   </div>
   <script>
-    let frases = ["19/04/2025", "Princesita 🥀"];
+    let frases = ["Haz click", "Hasta llegar a 30"];
     let clickCount = 0;
     let fraseIndex = 0;
     let gotas = [];
@@ -74,7 +72,8 @@
     let mensajeFinalizado = false;
     let musicaIniciada = false;
 
-    let textoBase = "Hola blablabla ...🥀";
+    let textoBase = "Hola :D"; // La dedicatoria simple modificada
+
     let textoVisible = "";
     let indexLetra = 0;
     let tiempoEscritura = 0;
@@ -86,29 +85,23 @@
     let borrandoFinal = false;
     let coloresTexto = ["#ff8080", "#ff4da6", "#ff00ff"];
 
-    let partesABorrar = [
-      { texto: "También puedo hacer que ciertas partes del texto se borren una vez hayan sido escritas ...", borrado: false },
-      { texto: " Como esa ...", borrado: false }
-    ];
-
-    // PARA la frase "Mi niña de ojos bonitos" y foto
+    // Frase para la foto
     let fraseFoto = "Mi niña de ojos bonitos";
     let textoVisibleFoto = "";
     let indexLetraFoto = 0;
     let tiempoEscrituraFoto = 0;
     const velocidadEscrituraFoto = 100;
     let tiempoMostrarFoto = 0;
-    const duracionFotoMS = 10000; // 10 segundos
+    const duracionFotoMS = 7000; // 7 segundos
 
-    // PARTICULAS
     let particulas = [];
-    let particulasLluviaActiva = true; // siempre activas
+    let particulasLluviaActiva = true;
 
-    // Array para color de letras dedicatoria y frase foto
     let coloresPorLetra = [];
     let coloresPorLetraFoto = [];
 
     function crearParticulas() {
+      particulas = [];
       for (let i = 0; i < 100; i++) {
         particulas.push({
           x: random(width),
@@ -123,32 +116,32 @@
     }
 
     function hexToRgb(hex) {
-  let res = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  return res ? {
-    r: parseInt(res[1], 16),
-    g: parseInt(res[2], 16),
-    b: parseInt(res[3], 16)
-  } : null;
-}
-
-function moverYdibujarParticulas() {
-  for (let p of particulas) {
-    p.x += p.dx;
-    p.y += p.dy;
-
-    if (p.x < 0 || p.x > width) p.dx *= -1;
-    if (p.y < 0 || p.y > height) p.dy *= -1;
-
-    let c = hexToRgb(p.color);
-    if (c) {
-      fill(c.r, c.g, c.b, p.alpha);
-    } else {
-      fill(255, p.alpha);
+      let res = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+      return res ? {
+        r: parseInt(res[1], 16),
+        g: parseInt(res[2], 16),
+        b: parseInt(res[3], 16)
+      } : null;
     }
-    noStroke();
-    ellipse(p.x, p.y, p.size);
-  }
-}
+
+    function moverYdibujarParticulas() {
+      for (let p of particulas) {
+        p.x += p.dx;
+        p.y += p.dy;
+
+        if (p.x < 0 || p.x > width) p.dx *= -1;
+        if (p.y < 0 || p.y > height) p.dy *= -1;
+
+        let c = hexToRgb(p.color);
+        if (c) {
+          fill(c.r, c.g, c.b, p.alpha);
+        } else {
+          fill(255, p.alpha);
+        }
+        noStroke();
+        ellipse(p.x, p.y, p.size);
+      }
+    }
 
     function setup() {
       createCanvas(windowWidth, windowHeight);
@@ -166,7 +159,6 @@ function moverYdibujarParticulas() {
       let c = document.querySelector('canvas');
       c.style.width = '100vw';
       c.style.height = '100vh';
-      particulas = [];
       crearParticulas();
     }
 
@@ -238,7 +230,12 @@ function moverYdibujarParticulas() {
         for (let i = gotas.length - 1; i >= 0; i--) {
           let g = gotas[i];
           let color = random(coloresTexto);
-          fill(color + hex(Math.floor(g.alpha), 2));
+          let c = hexToRgb(color);
+          if (c) {
+            fill(c.r, c.g, c.b, g.alpha);
+          } else {
+            fill(255, g.alpha);
+          }
           text(g.texto, g.x, g.y);
 
           if (g.explosion) {
@@ -256,7 +253,7 @@ function moverYdibujarParticulas() {
         }
 
         document.getElementById("foto").style.display = "none";
-        document.getElementById("dedicatoria").innerHTML = "";
+        document.getElementById("dedicatoria").innerHTML = "Hola :D";
       }
       else if (mostrarFotoYCadena && !mostrarDedicatoria) {
         document.getElementById("foto").style.display = "block";
@@ -304,29 +301,9 @@ function moverYdibujarParticulas() {
           tiempoEscritura = millis();
         }
 
-        for (let parte of partesABorrar) {
-          if (!parte.borrado && textoVisible.includes(parte.texto)) {
-            borrarDesde = textoVisible.lastIndexOf(parte.texto);
-            esperando = true;
-            tiempoEspera = millis();
-            parte.borrado = true;
-            break;
-          }
-        }
+        // Ya que el texto de la dedicatoria fue reemplazado con "Hola :D" se puede omitir la lógica borra partes.
 
-        if (esperando && millis() - tiempoEspera >= 1300) {
-          borrando = true;
-          esperando = false;
-        }
-
-        if (borrando && millis() - tiempoEscritura > velocidadEscritura) {
-          textoVisible = textoVisible.slice(0, textoVisible.length - 1);
-          tiempoEscritura = millis();
-          if (textoVisible.length <= borrarDesde) {
-            borrando = false;
-          }
-        }
-
+        // Aseguramos tamaño del array de colores
         while (coloresPorLetra.length < textoVisible.length) {
           coloresPorLetra.push(random(coloresTexto));
         }
